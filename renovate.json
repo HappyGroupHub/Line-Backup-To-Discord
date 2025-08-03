@@ -13,22 +13,19 @@
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "Python Dependencies (Minor/Patch)",
       "addLabels": ["dependencies"],
-      "postUpgradeTasks": {
-        "commands": ["uv export --no-hashes > requirements.txt"],
-        "fileFilters": ["requirements.txt"],
-        "executionMode": "update"
-      }
+      "automerge": false
     },
     {
       "matchManagers": ["pep621"],
       "matchUpdateTypes": ["major"],
       "groupName": "Python Dependencies (Major)",
-      "addLabels": ["dependencies"],
-      "postUpgradeTasks": {
-        "commands": ["uv export --no-hashes > requirements.txt"],
-        "fileFilters": ["requirements.txt"],
-        "executionMode": "update"
-      }
+      "addLabels": ["dependencies"]
+    },
+    {
+      "matchDepNames": ["python"],
+      "groupName": null,
+      "dependencyDashboardApproval": true,
+      "addLabels": ["dependencies"]
     },
     {
       "matchFileNames": ["requirements.txt"],
