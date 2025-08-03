@@ -2,6 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
   "schedule": ["on monday"],
+  "allowedCommands": ["^uv export --no-hashes"],
   "packageRules": [
     {
       "matchPackagePatterns": ["*"],
@@ -14,7 +15,7 @@
       "groupName": "Python Dependencies (Minor/Patch)",
       "addLabels": ["dependencies"],
       "postUpgradeTasks": {
-        "commands": ["uv export --no-hashes > requirements.txt"],
+        "commands": ["uv export --no-hashes"],
         "fileFilters": ["requirements.txt"],
         "executionMode": "update"
       }
@@ -25,10 +26,16 @@
       "groupName": "Python Dependencies (Major)",
       "addLabels": ["dependencies"],
       "postUpgradeTasks": {
-        "commands": ["uv export --no-hashes > requirements.txt"],
+        "commands": ["uv export --no-hashes"],
         "fileFilters": ["requirements.txt"],
         "executionMode": "update"
       }
+    },
+    {
+      "matchDepNames": ["python"],
+      "groupName": null,
+      "dependencyDashboardApproval": true,
+      "addLabels": ["dependencies"]
     },
     {
       "matchFileNames": ["requirements.txt"],
