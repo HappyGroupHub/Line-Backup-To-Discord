@@ -7,10 +7,10 @@ requires-python = "==3.10.*"
 dependencies = [
     "apnggif~=0.1.4",
     "discord-py==2.5.2",
-    "fastapi==0.115.11",
-    "line-bot-sdk==3.16.1",
-    "pydantic~=2.10.6",
+    "fastapi==0.116.1",
+    "line-bot-sdk==3.17.1",
+    "pydantic~=2.11.7",
     "pyyaml==6.0.2",
     "requests~=2.32.3",
-    "uvicorn==0.34.0",
+    "uvicorn==0.35.0",
 ]
