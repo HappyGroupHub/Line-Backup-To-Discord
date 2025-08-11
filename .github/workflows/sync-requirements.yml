@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Use the head ref for PRs to commit back to the PR branch
           ref: ${{ github.head_ref }}
