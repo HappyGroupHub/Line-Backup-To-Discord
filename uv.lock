@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.10.*"
 
 [[package]]
@@ -313,7 +313,7 @@ wheels = [
 
 [[package]]
 name = "line-bot-sdk"
-version = "3.17.1"
+version = "3.18.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aenum" },
@@ -325,9 +325,9 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/08/ae/7be821f6d286ac4f0497caa3e4ff699f4e99ab405adf2044a5b6bc83cc71/line_bot_sdk-3.17.1.tar.gz", hash = "sha256:b4b1300fa0661dac4c98e3df9467f249b16c7f767f226614c099a48346e135ae", size = 456527, upload-time = "2025-04-25T03:30:46.52Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/59/f6fafd28f95a570e693c179e93a700545d715c84cccf24b921c862e6b575/line_bot_sdk-3.18.0.tar.gz", hash = "sha256:f8f66528127be866ccd6b8802185f94f6154484103490df70b676033ec0da2bf", size = 469984, upload-time = "2025-08-06T09:32:35.26Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d4/32/ed6471753080e41d61156212d0032affda2d6d615b8933d2bafc65347e14/line_bot_sdk-3.17.1-py2.py3-none-any.whl", hash = "sha256:74ac0aa0a1f67ad51661f95843b5a090dad0cb178d14ae28b7fa81af35315ab7", size = 776059, upload-time = "2025-04-25T03:30:44.224Z" },
+    { url = "https://files.pythonhosted.org/packages/c3/e7/0d775788f2ce4ff06c701ecb965c5ceb21424f765786b939adb983e2f0cc/line_bot_sdk-3.18.0-py2.py3-none-any.whl", hash = "sha256:d5715d81bf2f4d6ddd3495c4b4617186e4054c4f27b76fece8dba053002e95ed", size = 824917, upload-time = "2025-08-06T09:32:32.868Z" },
 ]
 
 [[package]]
@@ -355,7 +355,7 @@ requires-dist = [
     { name = "apnggif", specifier = "~=0.1.4" },
     { name = "discord-py", specifier = "==2.5.2" },
     { name = "fastapi", specifier = "==0.116.1" },
-    { name = "line-bot-sdk", specifier = "==3.17.1" },
+    { name = "line-bot-sdk", specifier = "==3.18.0" },
     { name = "pydantic", specifier = "~=2.11.7" },
     { name = "pyyaml", specifier = "==6.0.2" },
     { name = "requests", specifier = "~=2.32.3" },

@@ -8,7 +8,7 @@ dependencies = [
     "apnggif~=0.1.4",
     "discord-py==2.5.2",
     "fastapi==0.116.1",
-    "line-bot-sdk==3.17.1",
+    "line-bot-sdk==3.18.0",
     "pydantic~=2.11.7",
     "pyyaml==6.0.2",
     "requests~=2.32.3",
