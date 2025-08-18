@@ -59,7 +59,7 @@ idna==3.10
     #   anyio
     #   requests
     #   yarl
-line-bot-sdk==3.18.0
+line-bot-sdk==3.18.1
     # via linebackuptodiscord
 macholib==1.16.3 ; sys_platform == 'darwin'
     # via pyinstaller
