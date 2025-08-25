@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = "==3.10.*"
 dependencies = [
     "apnggif~=0.1.4",
-    "discord-py==2.5.2",
+    "discord-py==2.6.2",
     "fastapi==0.116.1",
     "line-bot-sdk==3.18.0",
     "pydantic~=2.11.7",
