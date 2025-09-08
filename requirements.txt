@@ -38,7 +38,7 @@ coloredlogs==15.0.1
     # via apnggif
 deprecated==1.2.18
     # via line-bot-sdk
-discord-py==2.5.2
+discord-py==2.6.3
     # via linebackuptodiscord
 exceptiongroup==1.3.0
     # via anyio
@@ -59,7 +59,7 @@ idna==3.10
     #   anyio
     #   requests
     #   yarl
-line-bot-sdk==3.18.0
+line-bot-sdk==3.19.0
     # via linebackuptodiscord
 macholib==1.16.3 ; sys_platform == 'darwin'
     # via pyinstaller
