@@ -210,14 +210,14 @@ wheels = [
 
 [[package]]
 name = "discord-py"
-version = "2.5.2"
+version = "2.6.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7f/dd/5817c7af5e614e45cdf38cbf6c3f4597590c442822a648121a34dee7fa0f/discord_py-2.5.2.tar.gz", hash = "sha256:01cd362023bfea1a4a1d43f5280b5ef00cad2c7eba80098909f98bf28e578524", size = 1054879, upload-time = "2025-03-05T01:15:29.798Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6f/00/ec765ba7d5e16dfc070953a992379c8de8489164f9e006f7ebd8870b426f/discord_py-2.6.3.tar.gz", hash = "sha256:92bb3ef9dbe08525803be1e357bc0191f59ae16956690fc96c34f40bcd02c649", size = 1092075, upload-time = "2025-08-31T19:30:23.476Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/57/a8/dc908a0fe4cd7e3950c9fa6906f7bf2e5d92d36b432f84897185e1b77138/discord_py-2.5.2-py3-none-any.whl", hash = "sha256:81f23a17c50509ffebe0668441cb80c139e74da5115305f70e27ce821361295a", size = 1155105, upload-time = "2025-03-05T01:15:27.323Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/4e/05fcecd452bde37fba8e9545c318099cbb8bad7f496b6d9322fa2b88f92f/discord_py-2.6.3-py3-none-any.whl", hash = "sha256:69835269d73d9889a2f0efff4c91264a18998db0fdc4295a3c886fe9196dea4e", size = 1208828, upload-time = "2025-08-31T19:30:21.48Z" },
 ]
 
 [[package]]
@@ -313,7 +313,7 @@ wheels = [
 
 [[package]]
 name = "line-bot-sdk"
-version = "3.18.0"
+version = "3.19.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aenum" },
@@ -325,9 +325,9 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/59/f6fafd28f95a570e693c179e93a700545d715c84cccf24b921c862e6b575/line_bot_sdk-3.18.0.tar.gz", hash = "sha256:f8f66528127be866ccd6b8802185f94f6154484103490df70b676033ec0da2bf", size = 469984, upload-time = "2025-08-06T09:32:35.26Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1b/31/89bc07122c09d73a90a4f44b10cc4d5976faeccd2fa7a090652a1b4fcbbc/line_bot_sdk-3.19.0.tar.gz", hash = "sha256:675f9ebe5a551aff53bbf3344a0c66e4d43795cca00b9b6ea5acd7eccfdcc116", size = 466642, upload-time = "2025-08-26T01:48:28.144Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/e7/0d775788f2ce4ff06c701ecb965c5ceb21424f765786b939adb983e2f0cc/line_bot_sdk-3.18.0-py2.py3-none-any.whl", hash = "sha256:d5715d81bf2f4d6ddd3495c4b4617186e4054c4f27b76fece8dba053002e95ed", size = 824917, upload-time = "2025-08-06T09:32:32.868Z" },
+    { url = "https://files.pythonhosted.org/packages/69/ee/98d74d8d76ecd0a5e202b8d08f65c5fc08e1878786123685db38aad54405/line_bot_sdk-3.19.0-py2.py3-none-any.whl", hash = "sha256:7aeb8cafa4fec826d7092e7aea4e84b2a6c30e2839b396a5ab9ae69d5c8ff3c0", size = 816429, upload-time = "2025-08-26T01:48:25.928Z" },
 ]
 
 [[package]]
@@ -353,9 +353,9 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "apnggif", specifier = "~=0.1.4" },
-    { name = "discord-py", specifier = "==2.5.2" },
+    { name = "discord-py", specifier = "==2.6.3" },
     { name = "fastapi", specifier = "==0.116.1" },
-    { name = "line-bot-sdk", specifier = "==3.18.0" },
+    { name = "line-bot-sdk", specifier = "==3.19.0" },
     { name = "pydantic", specifier = "~=2.11.7" },
     { name = "pyyaml", specifier = "==6.0.2" },
     { name = "requests", specifier = "~=2.32.3" },
