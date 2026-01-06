@@ -4,7 +4,7 @@ aenum==3.1.16
     # via line-bot-sdk
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.12.14
+aiohttp==3.13.3
     # via
     #   discord-py
     #   line-bot-sdk
