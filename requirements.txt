@@ -95,7 +95,7 @@ pywin32-ctypes==0.2.3 ; sys_platform == 'win32'
     # via pyinstaller
 pyyaml==6.0.2
     # via linebackuptodiscord
-requests==2.32.4
+requests==2.33.1
     # via
     #   line-bot-sdk
     #   linebackuptodiscord
