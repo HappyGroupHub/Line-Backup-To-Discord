@@ -1,5 +1,7 @@
 import datetime
+import math
 import os
+import time
 import urllib.parse
 
 import requests
@@ -113,16 +115,21 @@ def handle_message(event):
             else:
                 reply_message = TextMessage(text="架設者未公開 Discord Bot 邀請連結")
         elif message_received == "確認並開始綁定":
-            group_name = line_bot_api.get_group_summary(group_id).group_name
-            binding_code = utils.generate_binding_code(group_id, group_name)
-            reply_message = TextMessage(text=f"請至欲同步的Discord頻道中\n" \
-                                             f"\n----------------------\n" \
-                                             f"輸入以下指令來完成綁定\n" \
-                                             f"/link {binding_code}\n" \
-                                             f"----------------------\n" \
-                                             f"\n※注意※\n" \
-                                             f"此綁定碼僅能使用一次\n" \
-                                             f"並將於5分鐘後過期")
+            if group_id in sync_channels_cache.line_group_ids:
+                reply_message = TextMessage(text="此群組已綁定")
+            else:
+                group_name = line_bot_api.get_group_summary(group_id).group_name
+                binding_code, expiration = utils.generate_binding_code(group_id, group_name)
+                minutes_left = max(1, math.ceil((expiration - time.time()) / 60))
+                reply_message = TextMessage(text=f"請至欲同步的Discord頻道中\n" \
+                                                 f"\n----------------------\n" \
+                                                 f"輸入以下指令來完成綁定\n" \
+                                                 f"/link {binding_code}\n" \
+                                                 f"----------------------\n" \
+                                                 f"\n※注意※\n" \
+                                                 f"此綁定碼僅能使用一次\n" \
+                                                 f"並將於{minutes_left}分鐘後過期\n" \
+                                                 f"過期前重複請求皆會取得同一組綁定碼")
         else:
             return
         line_bot_api.reply_message(ReplyMessageRequest(
