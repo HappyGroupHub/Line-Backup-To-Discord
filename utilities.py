@@ -177,8 +177,9 @@ def remove_binding_code(binding_code: int):
     :param int binding_code: Binding code.
     """
     data = json.load(open('binding_codes.json', 'r', encoding="utf8"))
-    if binding_code in data:
-        data.pop(binding_code)
+    # JSON object keys are always strings
+    if str(binding_code) in data:
+        data.pop(str(binding_code))
         update_json('binding_codes.json', data)
 
 
@@ -188,10 +189,10 @@ def get_binding_code_info(binding_code: int) -> dict | None:
     :param int binding_code: Binding code.
     :return dict: Return dict contains line_group_id and expiration if it exists, else None
     """
+    if not exists('./binding_codes.json'):
+        return None
     data = json.load(open('binding_codes.json', 'r', encoding="utf8"))
-    if binding_code in data:
-        return data[binding_code]
-    return None
+    return data.get(str(binding_code))
 
 
 def update_json(file_name: str, data: dict):

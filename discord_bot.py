@@ -10,8 +10,6 @@ from cache import sync_channels_cache
 
 config = utils.read_config()
 
-intents = discord.Intents.default()
-intents.message_content = True
 client = commands.Bot(command_prefix="!", intents=discord.Intents.default())
 
 
@@ -69,11 +67,11 @@ class AboutCommandView(discord.ui.View):
                                             emoji="🤖"))
             github_row = 1
         self.add_item(discord.ui.Button(label="Github原始碼",
-                                        url="https://github.com/HappyGroupHub/Discord-Line-Message-Sync",
+                                        url="https://github.com/HappyGroupHub/Line-Backup-To-Discord",
                                         style=discord.ButtonStyle.link,
                                         emoji="🔬", row=github_row))
         self.add_item(discord.ui.Button(label="使用條款與隱私政策",
-                                        url="https://github.com/HappyGroupHub/Discord-Line-Message-Sync",
+                                        url="https://github.com/HappyGroupHub/Line-Backup-To-Discord",
                                         style=discord.ButtonStyle.link,
                                         emoji="💡", row=github_row))
 
@@ -99,7 +97,7 @@ async def help(interaction: discord.Interaction):
 
 @app_commands.describe(binding_code="輸入你的綁定碼")
 async def link(interaction: discord.Interaction, binding_code: int):
-    binding_info = utils.get_binding_code_info(str(binding_code))
+    binding_info = utils.get_binding_code_info(binding_code)
     if binding_info is None:
         reply_message = "綁定失敗, 該綁定碼輸入錯誤或格式不正確, 請再試一次."
         await interaction.response.send_message(reply_message, ephemeral=True)
