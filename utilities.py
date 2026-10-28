@@ -46,9 +46,10 @@ webhook_port: 5000
 #   'unlimited'    - Keep every file forever (default)
 #   'size_limit'   - Keep the folder under downloads_max_size_mb, the least recently used files
 #                    are removed automatically when it gets bigger than that
-#   'instant_burn' - Remove files right after they are sent to Discord, nothing is kept
+#   'instant_burn' - Remove pictures, videos, audios and files right after they are sent to Discord.
+#                    Stickers are kept as a cache, limited by downloads_max_size_mb
 downloads_mode: 'unlimited'
-# Max size of the downloads folder in MB, only used when downloads_mode is 'size_limit'
+# Max size of the downloads folder in MB, used when downloads_mode is 'size_limit' or 'instant_burn'
 downloads_max_size_mb: 1024
 
 

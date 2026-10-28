@@ -35,7 +35,8 @@ async def main():
     sync_channels_cache.load_all_sync_channels()
 
     # Trim the downloads folder in case it grew over the limit while the bot was offline
-    if config['downloads_mode'] == download_manager.MODE_SIZE_LIMIT:
+    if config['downloads_mode'] in (download_manager.MODE_SIZE_LIMIT,
+                                    download_manager.MODE_INSTANT_BURN):
         download_manager.enforce_size_limit(config['downloads_max_size_mb'])
 
     await asyncio.gather(

@@ -115,12 +115,18 @@ def handle_sent_file(file_path: str, config: dict):
     :param dict config: Config read from config.yml.
     """
     mode = config['downloads_mode']
-    if mode == MODE_INSTANT_BURN:
-        sticker_dir = os.path.abspath(STICKERS_DIR)
-        parent_dir = os.path.dirname(os.path.abspath(file_path))
-        if os.path.dirname(parent_dir) == sticker_dir:  # Remove the whole sticker package
-            remove(parent_dir)
-        else:
-            remove(file_path)
-    elif mode == MODE_SIZE_LIMIT:
+    # Sticker packages are a cache reused by every sticker in them, so instant_burn keeps them
+    if mode == MODE_INSTANT_BURN and not is_sticker(file_path):
+        remove(file_path)
+    if mode in (MODE_SIZE_LIMIT, MODE_INSTANT_BURN):
         enforce_size_limit(config['downloads_max_size_mb'])
+
+
+def is_sticker(file_path: str) -> bool:
+    """Check if a file is inside the sticker cache folder.
+
+    :param str file_path: Path to a file.
+    :return bool: True if the file is a sticker.
+    """
+    sticker_dir = os.path.abspath(STICKERS_DIR)
+    return os.path.abspath(file_path).startswith(sticker_dir + os.sep)
