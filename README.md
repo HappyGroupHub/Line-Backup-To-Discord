@@ -70,9 +70,9 @@ Find it out by the following tutorial!
 4. Run `run.bat` / `run.sh` again to start the bot
 5. Set up the LINE webhook to point to your server, see [here](#Setting-up-LINE-webhook)
 6. Invite the Discord bot to your Discord server, and add the LINE bot to your LINE group
-7. In the LINE group, tag the bot (`@<your LINE bot name>`), then pick `已邀請` (invited) in the reply. The bot will send
-   you a 6-digit binding code, which can only be used once and expires in 5 minutes. Asking again before it expires
-   gives you the same code
+7. In the LINE group, tag the bot (`@<your LINE bot name>`), then tap `邀請好了` (invited) in the reply. The bot will
+   send you a 6-digit binding code, with the command in its own message so it's easy to copy. The code can only be
+   used once and expires in 5 minutes. Asking again before it expires gives you the same code
 8. Send `/link <binding_code>` in the Discord channel you want to back up to
 9. Done! Every new message in the LINE group will now be backed up to that Discord channel!
 
@@ -307,7 +307,7 @@ Discord webhook 等技術。每則訊息都會以發送者的 LINE 名稱及大�
 4. 再次運行 `run.bat` / `run.sh` 來啟動機器人
 5. 設定 LINE Webhook 指向你的伺服器，請參考 [這裡](#設定-LINE-Webhook)
 6. 邀請 Discord 機器人至你的 Discord 伺服器，並將 LINE 機器人加入你的 LINE 群組
-7. 在 LINE 群組中 tag 機器人 (`@<你的 LINE 機器人名稱>`)，並在回覆中選擇 `已邀請`，機器人會傳送一組 6 位數的綁定碼給你，
+7. 在 LINE 群組中 tag 機器人 (`@<你的 LINE 機器人名稱>`)，並在回覆中點選 `邀請好了`，機器人會另外傳送一則只有指令的訊息，方便你長按複製 6 位數的綁定碼，
    此綁定碼僅能使用一次，並將於 5 分鐘後過期，過期前重複請求皆會取得同一組綁定碼
 8. 在你想要備份的 Discord 頻道中輸入 `/link <綁定碼>`
 9. 完成！之後 LINE 群組中的每則新訊息都會備份到該 Discord 頻道！

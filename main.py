@@ -3,6 +3,7 @@ import asyncio
 import uvicorn
 
 import download_manager
+import messages
 import utilities as utils
 from cache import sync_channels_cache
 from discord_bot import client, on_ready, about, help, link, unlink
@@ -21,11 +22,8 @@ async def run_discord_bot():
     client.event(on_ready)
 
     # Register commands
-    client.tree.command(name="about", description="關於此機器人, 查看目前連動備份的服務")(about)
-    client.tree.command(name="help", description="此指令會協助你使用此機器人")(help)
-    client.tree.command(name="link", description="此指令用來與Line群組綁定，並進行連動備份")(link)
-    client.tree.command(name="unlink",
-                        description="此指令用來解除與Line群組的綁定, 並取消連動備份")(unlink)
+    for name, command in (("about", about), ("help", help), ("link", link), ("unlink", unlink)):
+        client.tree.command(name=name, description=messages.COMMAND_DESCRIPTIONS[name])(command)
 
     await client.start(config.get('discord_bot_token'))
 

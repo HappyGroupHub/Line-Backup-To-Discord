@@ -13,14 +13,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from linebot.v3 import WebhookHandler
 from linebot.v3.exceptions import InvalidSignatureError
 from linebot.v3.messaging import Configuration, ApiClient, MessagingApi, TextMessage, \
-    ReplyMessageRequest, TemplateMessage, ConfirmTemplate, MessageAction, PushMessageRequest
+    ReplyMessageRequest, TemplateMessage, ConfirmTemplate, PostbackAction, PushMessageRequest
 from linebot.v3.webhooks import MessageEvent, TextMessageContent, ImageMessageContent, \
     VideoMessageContent, AudioMessageContent, StickerMessageContent, FileMessageContent, \
-    LocationMessageContent
+    LocationMessageContent, PostbackEvent, JoinEvent
 from pydantic import StrictStr
 
 import download_manager
 import line_sticker_downloader
+import messages
 import utilities as utils
 from cache import sync_channels_cache
 
@@ -53,6 +54,10 @@ def get_bot_name() -> str:
 
 bot_name = get_bot_name()
 dc_bot_invite_link = config['discord_bot_invite_link']
+
+# Postback data of the menu buttons
+POSTBACK_INVITE_LINK = 'action=invite_link'
+POSTBACK_BIND = 'action=bind'
 
 
 @app.post("/callback")
@@ -89,51 +94,114 @@ def handle_message(event):
             author = line_bot_api.get_group_member_profile(group_id, event.source.user_id)
             dc_channel_webhook = sync_channels_cache.get_dc_webhook_by_line_group_id(group_id)
             discord_webhook = SyncWebhook.from_url(dc_channel_webhook)
-            discord_webhook.send(message_received, username=f"{author.display_name} - (Line訊息)",
+            discord_webhook.send(message_received,
+                                 username=messages.discord_backup_username(author.display_name),
                                  avatar_url=author.picture_url)
 
         # Handle commands messages
         if message_received == "!ID":
-            reply_message = TextMessage(text=f"Group ID: {group_id}")
-        elif message_received == f"@{bot_name} ":
-            if group_id in sync_channels_cache.line_group_ids:
-                reply_message = TextMessage(text="此群組已綁定")
-            else:
-                confirm_template = ConfirmTemplate(
-                    text=StrictStr("請問你的 Discord 伺服器邀請備份機器人了嗎？"),
-                    actions=[
-                        MessageAction(label=StrictStr("還沒"),
-                                      text=StrictStr("獲取 Discord 備份機器人邀請連結")),
-                        MessageAction(label=StrictStr("已邀請"),
-                                      text=StrictStr("確認並開始綁定"))
-                    ])
-                reply_message = TemplateMessage(altText="是否完成加入 Discord 機器人？",
-                                                template=confirm_template)
+            reply_messages = [TextMessage(text=messages.line_group_id(group_id))]
+        elif is_bot_mentioned(event.message):
+            reply_messages = build_menu_reply(group_id)
+        # Text commands sent by the buttons of older versions, still in the chat history
         elif message_received == "獲取 Discord 備份機器人邀請連結":
-            if dc_bot_invite_link:
-                reply_message = TextMessage(text=dc_bot_invite_link)
-            else:
-                reply_message = TextMessage(text="架設者未公開 Discord Bot 邀請連結")
+            reply_messages = build_invite_link_reply()
         elif message_received == "確認並開始綁定":
-            if group_id in sync_channels_cache.line_group_ids:
-                reply_message = TextMessage(text="此群組已綁定")
-            else:
-                group_name = line_bot_api.get_group_summary(group_id).group_name
-                binding_code, expiration = utils.generate_binding_code(group_id, group_name)
-                minutes_left = max(1, math.ceil((expiration - time.time()) / 60))
-                reply_message = TextMessage(text=f"請至欲同步的Discord頻道中\n" \
-                                                 f"\n----------------------\n" \
-                                                 f"輸入以下指令來完成綁定\n" \
-                                                 f"/link {binding_code}\n" \
-                                                 f"----------------------\n" \
-                                                 f"\n※注意※\n" \
-                                                 f"此綁定碼僅能使用一次\n" \
-                                                 f"並將於{minutes_left}分鐘後過期\n" \
-                                                 f"過期前重複請求皆會取得同一組綁定碼")
+            reply_messages = build_binding_reply(line_bot_api, group_id)
         else:
             return
         line_bot_api.reply_message(ReplyMessageRequest(
-            reply_token=event.reply_token, messages=[reply_message]))
+            reply_token=event.reply_token, messages=reply_messages))
+
+
+@handler.add(PostbackEvent)
+def handle_postback(event):
+    """Handle the buttons of the menu sent by build_menu_reply()."""
+    with ApiClient(configuration) as api_client:
+        if event.source.type != 'group':
+            return
+        line_bot_api = MessagingApi(api_client)
+        group_id = event.source.group_id
+        if event.postback.data == POSTBACK_INVITE_LINK:
+            reply_messages = build_invite_link_reply()
+        elif event.postback.data == POSTBACK_BIND:
+            reply_messages = build_binding_reply(line_bot_api, group_id)
+        else:
+            return
+        line_bot_api.reply_message(ReplyMessageRequest(
+            reply_token=event.reply_token, messages=reply_messages))
+
+
+@handler.add(JoinEvent)
+def handle_join(event):
+    """Greet the group when the bot is added to it."""
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message(ReplyMessageRequest(
+            reply_token=event.reply_token,
+            messages=[TextMessage(text=messages.LINE_JOIN_GREETING)]))
+
+
+def is_bot_mentioned(message: TextMessageContent) -> bool:
+    """Check if the bot is tagged(@) in the message.
+
+    :param TextMessageContent message: The text message received.
+    :return bool: True if the bot is tagged.
+    """
+    if message.mention:
+        return any(getattr(mentionee, 'is_self', False)
+                   for mentionee in message.mention.mentionees)
+    # Fallback for messages without mention info, e.g. typing the bot name by hand
+    return message.text.strip() == f"@{bot_name}"
+
+
+def build_menu_reply(group_id: str) -> list:
+    """Build the reply when the bot is tagged: binding status, or the menu to start binding.
+
+    :param str group_id: LINE group ID.
+    :return list: Messages to reply.
+    """
+    subscribed_info = sync_channels_cache.get_info_by_line_group_id(group_id)
+    if subscribed_info:
+        return [TextMessage(
+            text=messages.line_already_bound(subscribed_info['discord_channel_name']))]
+    confirm_template = ConfirmTemplate(
+        text=StrictStr(messages.LINE_MENU_TEXT),
+        actions=[
+            PostbackAction(label=StrictStr(messages.LINE_MENU_NOT_YET_LABEL),
+                           data=StrictStr(POSTBACK_INVITE_LINK),
+                           displayText=StrictStr(messages.LINE_MENU_NOT_YET_DISPLAY)),
+            PostbackAction(label=StrictStr(messages.LINE_MENU_READY_LABEL),
+                           data=StrictStr(POSTBACK_BIND),
+                           displayText=StrictStr(messages.LINE_MENU_READY_DISPLAY))
+        ])
+    return [TemplateMessage(altText=messages.LINE_MENU_ALT_TEXT, template=confirm_template)]
+
+
+def build_invite_link_reply() -> list:
+    """Build the reply with the Discord bot invite link.
+
+    :return list: Messages to reply.
+    """
+    if dc_bot_invite_link:
+        return [TextMessage(text=messages.line_invite_link(dc_bot_invite_link))]
+    return [TextMessage(text=messages.line_invite_link_unavailable(config['bot_hosted_by']))]
+
+
+def build_binding_reply(line_bot_api: MessagingApi, group_id: str) -> list:
+    """Build the reply with a binding code, the command is sent alone so it's easy to copy.
+
+    :param MessagingApi line_bot_api: LINE messaging API client.
+    :param str group_id: LINE group ID.
+    :return list: Messages to reply.
+    """
+    if group_id in sync_channels_cache.line_group_ids:
+        return build_menu_reply(group_id)
+    group_name = line_bot_api.get_group_summary(group_id).group_name
+    binding_code, expiration = utils.generate_binding_code(group_id, group_name)
+    minutes_left = max(1, math.ceil((expiration - time.time()) / 60))
+    return [TextMessage(text=messages.line_binding_code_instructions(minutes_left)),
+            TextMessage(text=messages.line_binding_command(binding_code))]
 
 
 @handler.add(MessageEvent, message=StickerMessageContent)
@@ -154,7 +222,7 @@ def handle_sticker_message(event):
                 return
             discord_webhook = SyncWebhook.from_url(subscribed_info['discord_channel_webhook'])
             discord_webhook.send(file=File(sticker_file),
-                                 username=f"{author.display_name} - (Line訊息)",
+                                 username=messages.discord_backup_username(author.display_name),
                                  avatar_url=author.picture_url)
             download_manager.handle_sent_file(sticker_file, config)
 
@@ -173,7 +241,7 @@ def handle_image_message(event):
                                          'image')
             discord_webhook = SyncWebhook.from_url(subscribed_info['discord_channel_webhook'])
             discord_webhook.send(file=File(file_path),
-                                 username=f"{author.display_name} - (Line訊息)",
+                                 username=messages.discord_backup_username(author.display_name),
                                  avatar_url=author.picture_url)
             download_manager.handle_sent_file(file_path, config)
 
@@ -192,7 +260,7 @@ def handle_video_message(event):
                                          'video')
             discord_webhook = SyncWebhook.from_url(subscribed_info['discord_channel_webhook'])
             discord_webhook.send(file=File(file_path),
-                                 username=f"{author.display_name} - (Line訊息)",
+                                 username=messages.discord_backup_username(author.display_name),
                                  avatar_url=author.picture_url)
             download_manager.handle_sent_file(file_path, config)
 
@@ -211,7 +279,7 @@ def handle_video_message(event):
                                          'audio')
             discord_webhook = SyncWebhook.from_url(subscribed_info['discord_channel_webhook'])
             discord_webhook.send(file=File(file_path),
-                                 username=f"{author.display_name} - (Line訊息)",
+                                 username=messages.discord_backup_username(author.display_name),
                                  avatar_url=author.picture_url)
             download_manager.handle_sent_file(file_path, config)
 
@@ -230,7 +298,7 @@ def handle_file_message(event):
                                          'file', file_name=event.message.file_name)
             discord_webhook = SyncWebhook.from_url(subscribed_info['discord_channel_webhook'])
             discord_webhook.send(file=File(file_path),
-                                 username=f"{author.display_name} - (Line訊息)",
+                                 username=messages.discord_backup_username(author.display_name),
                                  avatar_url=author.picture_url)
             download_manager.handle_sent_file(file_path, config)
 
@@ -253,16 +321,13 @@ def handle_location_message(event):
                 google_maps_link = (f"https://www.google.com/maps?q="
                                     f"{location.latitude},{location.longitude}")
 
-            location_message = f"📍 {author.display_name}分享了位置訊息\n\n"
-            if hasattr(location, 'title') and location.title:
-                location_message += f"地點名稱: **{location.title}**\n"
-            if hasattr(location, 'address') and location.address:
-                location_message += f"詳細地址: [{location.address}]({google_maps_link})\n"
-            else:
-                location_message += google_maps_link
+            location_message = messages.discord_location(
+                getattr(location, 'title', None), getattr(location, 'address', None),
+                google_maps_link, location.latitude, location.longitude)
 
             discord_webhook = SyncWebhook.from_url(subscribed_info['discord_channel_webhook'])
-            discord_webhook.send(location_message, username=f"{author.display_name} - (Line訊息)",
+            discord_webhook.send(location_message,
+                                 username=messages.discord_backup_username(author.display_name),
                                  avatar_url=author.picture_url)
 
 
