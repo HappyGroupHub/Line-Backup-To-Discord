@@ -3,12 +3,12 @@ name = "LineBackupToDiscord"
 version = "0.1.0"
 description = "A bot that backup messages from Line to Discord in real-time"
 readme = "README.md"
-requires-python = "==3.10.*"
+requires-python = "==3.13.*"
 dependencies = [
-    "apnggif~=0.1.4",
     "discord-py==2.7.1",
     "fastapi==0.162.0",
     "line-bot-sdk==3.27.0",
+    "pillow~=13.0.0",
     "pydantic~=2.14.1",
     "pyyaml==6.0.3",
     "requests~=2.34.2",

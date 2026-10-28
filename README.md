@@ -54,7 +54,7 @@ Find it out by the following tutorial!
 
 ### Requirements
 
-- [Python 3.10](https://www.python.org/downloads/)
+- [Python 3.13](https://www.python.org/downloads/)
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) (recommended) - if uv isn't installed, the run script
   falls back to `venv` + `pip install -r requirements.txt`
 - A public HTTPS URL that forwards to this bot, so LINE can send webhooks to it,
@@ -225,7 +225,7 @@ Want to build a standalone executable? See [build_executable](./build_executable
 * [Pydantic](https://github.com/pydantic/pydantic) for data validation
 * [PyYAML](https://github.com/yaml/pyyaml) for reading config file
 * [requests](https://github.com/psf/requests) for sending HTTP requests
-* [apnggif](https://github.com/yukinarit/apnggif) for converting animated stickers to GIFs
+* [Pillow](https://github.com/python-pillow/Pillow) for converting animated stickers to GIFs
 * [PyInstaller](https://github.com/pyinstaller/pyinstaller) for building executables
 
 ### Code style and commits
@@ -294,7 +294,7 @@ Discord webhook 等技術。每則訊息都會以發送者的 LINE 名稱及大�
 
 ### 系統需求
 
-- [Python 3.10](https://www.python.org/downloads/)
+- [Python 3.13](https://www.python.org/downloads/)
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) (建議安裝) - 若未安裝 uv，執行腳本會改用
   `venv` + `pip install -r requirements.txt` 來建立環境
 - 一個可以轉發到此機器人的 HTTPS 公開網址，讓 LINE 能夠傳送 Webhook，若你沒有的話請參考 [這裡](#使用-Ngrok-建立符合-HTTPS-協議的端點網址)
@@ -458,7 +458,7 @@ port 的反向代理。如果你不知道如何申請，可以使用 [ngrok](htt
 * [Pydantic](https://github.com/pydantic/pydantic) 用來驗證資料格式
 * [PyYAML](https://github.com/yaml/pyyaml) 用來讀取 config.yml 檔案
 * [requests](https://github.com/psf/requests) 用來傳送 HTTP 請求
-* [apnggif](https://github.com/yukinarit/apnggif) 用來將動態貼圖轉換為 GIF
+* [Pillow](https://github.com/python-pillow/Pillow) 用來將動態貼圖轉換為 GIF
 * [PyInstaller](https://github.com/pyinstaller/pyinstaller) 用來打包執行檔
 
 ### 程式碼撰寫/提交規範

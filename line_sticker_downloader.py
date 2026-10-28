@@ -2,7 +2,9 @@ import json
 import os
 
 import requests
-from apnggif import apnggif
+from PIL import Image, ImageSequence
+
+GIF_TRANSPARENT_INDEX = 255  # Palette index reserved for transparency, colors use 0-254
 
 
 def get_package_info(sticker_id: int) -> dict | None:
@@ -76,7 +78,19 @@ def convert_apng_to_gif(apng_file_path: str, gif_file_path: str | None = None) -
     """
     gif_file_path = gif_file_path or apng_file_path.replace('.apng', '.gif')
     try:
-        apnggif(apng_file_path, gif_file_path)
+        with Image.open(apng_file_path) as apng:
+            frames, durations = [], []
+            for frame in ImageSequence.Iterator(apng):
+                rgba = frame.convert('RGBA')
+                durations.append(frame.info.get('duration', 100))
+                # GIF only supports on/off transparency, pixels under 50% alpha become transparent
+                transparent_mask = rgba.getchannel('A').point(lambda a: 255 if a < 128 else 0)
+                gif_frame = rgba.convert('RGB').quantize(colors=255)
+                gif_frame.paste(GIF_TRANSPARENT_INDEX, mask=transparent_mask)
+                frames.append(gif_frame)
+            frames[0].save(gif_file_path, save_all=True, append_images=frames[1:],
+                           duration=durations, loop=apng.info.get('loop', 0), disposal=2,
+                           transparency=GIF_TRANSPARENT_INDEX)
     except Exception as error:
         print(f"Error while converting APNG to GIF: {error}")
         return None
