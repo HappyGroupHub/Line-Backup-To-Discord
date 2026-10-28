@@ -7,6 +7,7 @@ from os.path import exists
 import yaml
 from yaml import SafeLoader
 
+import download_manager
 from cache import sync_channels_cache
 
 
@@ -39,6 +40,16 @@ discord_bot_token: ''
 # Backend server configuration, aka the webhook server port for LINE.
 # If you change port, make sure to change the port in your reverse proxy(ngrok etc..) as well.
 webhook_port: 5000
+
+# Downloads folder settings.
+# Pictures, videos, audios, files and stickers are saved in the downloads folder, pick how to manage it:
+#   'unlimited'    - Keep every file forever (default)
+#   'size_limit'   - Keep the folder under downloads_max_size_mb, the least recently used files
+#                    are removed automatically when it gets bigger than that
+#   'instant_burn' - Remove files right after they are sent to Discord, nothing is kept
+downloads_mode: 'unlimited'
+# Max size of the downloads folder in MB, only used when downloads_mode is 'size_limit'
+downloads_max_size_mb: 1024
 
 
 # (Optional settings)
@@ -75,6 +86,8 @@ def read_config():
                 'line_channel_secret': data['line_channel_secret'],
                 'discord_bot_token': data['discord_bot_token'],
                 'webhook_port': data['webhook_port'],
+                'downloads_mode': data.get('downloads_mode', download_manager.MODE_UNLIMITED),
+                'downloads_max_size_mb': data.get('downloads_max_size_mb', 1024),
                 'bot_hosted_by': data.get('bot_hosted_by', 'PlayfunI Network'),
                 'line_bot_invite_link': data['line_bot_invite_link'],
                 'discord_bot_invite_link': data['discord_bot_invite_link']
@@ -91,6 +104,14 @@ def read_config():
         if field not in config or not config[field]:
             graceful_exit(f"Missing required field: {field} in config.yml")
             sys.exit()
+
+    if config['downloads_mode'] not in download_manager.MODES:
+        graceful_exit(f"Invalid downloads_mode: {config['downloads_mode']} in config.yml, "
+                      f"must be one of {', '.join(download_manager.MODES)}")
+    max_size = config['downloads_max_size_mb']
+    if isinstance(max_size, bool) or not isinstance(max_size, (int, float)) or max_size <= 0:
+        graceful_exit(f"Invalid downloads_max_size_mb: {max_size} in config.yml, "
+                      f"must be a number bigger than 0")
     return config
 
 

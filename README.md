@@ -42,6 +42,8 @@ Supported message types:
 | Any other types of messages             |   ❌️    |
 
 Pictures, videos, audios, files and stickers are also saved locally in the `downloads` folder.
+To keep the folder from growing forever, you can set `downloads_mode` in `config.yml` to limit its size
+(`size_limit`) or remove files right after they are backed up (`instant_burn`), see [here](#Managing-the-downloads-folder).
 
 You can definitely host this service yourself! and it's free!
 Find it out by the following tutorial!
@@ -106,6 +108,16 @@ discord_bot_token: ''
 # If you change port, make sure to change the port in your reverse proxy(ngrok etc..) as well.
 webhook_port: 5000
 
+# Downloads folder settings.
+# Pictures, videos, audios, files and stickers are saved in the downloads folder, pick how to manage it:
+#   'unlimited'    - Keep every file forever (default)
+#   'size_limit'   - Keep the folder under downloads_max_size_mb, the least recently used files
+#                    are removed automatically when it gets bigger than that
+#   'instant_burn' - Remove files right after they are sent to Discord, nothing is kept
+downloads_mode: 'unlimited'
+# Max size of the downloads folder in MB, only used when downloads_mode is 'size_limit'
+downloads_max_size_mb: 1024
+
 
 # (Optional settings)
 # You can fill in your own bot invite link and hosted by information
@@ -115,6 +127,17 @@ bot_hosted_by: 'PlayfunI Network'
 line_bot_invite_link: ''
 discord_bot_invite_link: ''
 ```
+
+### Managing the downloads folder
+
+Pictures, videos, audios, files and stickers can take up a lot of disk space over time. Use `downloads_mode` in
+`config.yml` to choose how the `downloads` folder is managed:
+
+| `downloads_mode`        | What it does                                                                                                                                                                                                                       |
+|:------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `unlimited` (default)   | Keep every file forever                                                                                                                                                                                                            |
+| `size_limit`            | Keep the folder under `downloads_max_size_mb` MB. When it gets bigger, the least recently used files are removed first. A sticker package is removed as a whole. The limit is also checked when the bot starts                     |
+| `instant_burn`          | Remove each file right after it's sent to Discord, nothing is kept locally. Stickers are removed too, so a sticker package is downloaded again every time one of its stickers is sent                                               |
 
 ### How to get LINE channel access token and secret
 
@@ -257,6 +280,8 @@ Discord webhook 等技術。每則訊息都會以發送者的 LINE 名稱及大�
 | 任何其他種類的訊息                  | ❌️ |
 
 圖片、影片、音檔、檔案及貼圖也會另外儲存一份在本機的 `downloads` 資料夾中。
+為了避免資料夾無限制地變大，你可以在 `config.yml` 中設定 `downloads_mode` 來限制資料夾大小 (`size_limit`)，
+或是在備份完成後立即刪除檔案 (`instant_burn`)，請參考 [這裡](#管理-downloads-資料夾)。
 
 想要自己架設這個訊息備份機器人嗎?
 快點看看下面的使用教學吧!
@@ -318,6 +343,16 @@ discord_bot_token: ''
 # If you change port, make sure to change the port in your reverse proxy(ngrok etc..) as well.
 webhook_port: 5000
 
+# Downloads folder settings.
+# Pictures, videos, audios, files and stickers are saved in the downloads folder, pick how to manage it:
+#   'unlimited'    - Keep every file forever (default)
+#   'size_limit'   - Keep the folder under downloads_max_size_mb, the least recently used files
+#                    are removed automatically when it gets bigger than that
+#   'instant_burn' - Remove files right after they are sent to Discord, nothing is kept
+downloads_mode: 'unlimited'
+# Max size of the downloads folder in MB, only used when downloads_mode is 'size_limit'
+downloads_max_size_mb: 1024
+
 
 # (Optional settings)
 # You can fill in your own bot invite link and hosted by information
@@ -327,6 +362,17 @@ bot_hosted_by: 'PlayfunI Network'
 line_bot_invite_link: ''
 discord_bot_invite_link: ''
 ```
+
+### 管理 downloads 資料夾
+
+圖片、影片、音檔、檔案及貼圖長時間累積下來會佔用不少硬碟空間，你可以在 `config.yml` 中透過 `downloads_mode` 選擇 `downloads`
+資料夾的管理方式：
+
+| `downloads_mode`        | 說明                                                                                                               |
+|:------------------------|:------------------------------------------------------------------------------------------------------------------|
+| `unlimited` (預設)       | 永久保留所有檔案                                                                                                     |
+| `size_limit`            | 將資料夾維持在 `downloads_max_size_mb` MB 以下，超過時會優先刪除最久沒被使用的檔案，貼圖包會整包一起刪除。機器人啟動時也會檢查一次 |
+| `instant_burn`          | 檔案傳送至 Discord 後立即刪除，本機不保留任何檔案。貼圖也會被刪除，因此每次傳送貼圖時都會重新下載整個貼圖包                       |
 
 ### 獲取 LINE channel access token 及 secret
 
