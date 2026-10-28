@@ -1,0 +1,112 @@
+name: Release
+
+# Builds LineBackupToDiscord.exe on Windows and publishes it as a GitHub release.
+# The version comes from VERSION in utilities.py, and the release notes from its section in CHANGELOG.md.
+on:
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: 'Create the release as a draft, so it can be checked before publishing'
+        type: boolean
+        default: true
+  push:
+    tags: [ 'v*' ]
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      # Build with the official python.org Python from setup-python, not a uv managed one
+      UV_PYTHON_PREFERENCE: only-system
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "latest"
+
+      - name: Read version and release notes
+        run: |
+          # Windows checkouts have CRLF line endings, drop the CR before matching lines
+          version=$(tr -d '\r' < utilities.py | sed -n 's/^VERSION = "\(.*\)"$/\1/p')
+          if [ -z "$version" ]; then
+            echo "::error::VERSION not found in utilities.py"
+            exit 1
+          fi
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" != "$version" ]; then
+            echo "::error::Tag ${{ github.ref_name }} doesn't match VERSION $version in utilities.py"
+            exit 1
+          fi
+
+          # The heading of the version in CHANGELOG.md, e.g. "## v0.1.1 - Title", is the release title
+          tr -d '\r' < CHANGELOG.md > changelog.tmp
+          title=$(grep -m 1 "^## $version\b" changelog.tmp | sed 's/^## //')
+          if [ -z "$title" ]; then
+            echo "::error::No '## $version' section in CHANGELOG.md"
+            exit 1
+          fi
+          awk -v heading="^## $version( |$)" '
+            $0 ~ heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' changelog.tmp > release_notes.md
+          echo "**Full Changelog**: https://github.com/${{ github.repository }}/blob/$version/CHANGELOG.md" >> release_notes.md
+
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "TITLE=$title" >> "$GITHUB_ENV"
+          echo "Releasing $title"
+
+      - name: Build executable
+        run: |
+          uv sync --frozen
+          uv run pyinstaller --onefile --name=LineBackupToDiscord --icon=./readme_imgs/logo.ico \
+            --additional-hooks-dir ./build_executable/extra_hooks main.py
+
+      - name: Smoke test and package
+        run: |
+          package="LineBackupToDiscord-$VERSION"
+          mkdir "$package"
+          cp dist/LineBackupToDiscord.exe "$package/"
+          # The first run generates config.yml and waits for Enter, the generated file ships in the zip
+          cd "$package"
+          echo | timeout 120 ./LineBackupToDiscord.exe
+          if ! grep -q "Made by LD *$VERSION" config.yml; then
+            echo "::error::The executable didn't generate config.yml for $VERSION"
+            exit 1
+          fi
+          cd ..
+          7z a "$package.zip" "$package"
+          echo "PACKAGE=$package.zip" >> "$GITHUB_ENV"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            # Re-running for an existing release, e.g. a draft, replaces its notes and zip
+            gh release edit "$VERSION" --title "$TITLE" --notes-file release_notes.md
+            gh release upload "$VERSION" "$PACKAGE" --clobber
+          else
+            draft_flag=""
+            if [ "${{ inputs.draft }}" = "true" ]; then
+              draft_flag="--draft"
+            fi
+            gh release create "$VERSION" "$PACKAGE" --title "$TITLE" --notes-file release_notes.md \
+              --target "$GITHUB_SHA" $draft_flag
+          fi
