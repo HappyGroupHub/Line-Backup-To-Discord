@@ -10,6 +10,8 @@ from yaml import SafeLoader
 import download_manager
 from cache import sync_channels_cache
 
+VERSION = "v0.1.1"
+
 
 def graceful_exit(message=""):
     """Exit program gracefully with a pause for user to read the message."""
@@ -22,9 +24,9 @@ def graceful_exit(message=""):
 def config_file_generator():
     """Generate the template of config file"""
     with open('config.yml', 'w', encoding="utf8") as file:
-        file.write("""# ++--------------------------------++
+        file.write(f"""# ++--------------------------------++
 # | LineBackupToDiscord (MIT LICENSE)|
-# | Made by LD               v0.1.0  |
+# | Made by LD{VERSION:>21}  |
 # ++--------------------------------++
 
 

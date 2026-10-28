@@ -56,7 +56,7 @@ async def about(interaction: discord.Interaction):
     embed_message.add_field(name=messages.ABOUT_STATUS_FIELD, value=status, inline=False)
     embed_message.add_field(name="作者", value="LD", inline=True)
     embed_message.add_field(name="架設者", value=config['bot_hosted_by'], inline=True)
-    embed_message.add_field(name="版本", value="v0.1.0", inline=True)
+    embed_message.add_field(name="版本", value=utils.VERSION, inline=True)
     await interaction.response.send_message(embed=embed_message, view=AboutCommandView())
 
 

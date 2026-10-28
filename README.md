@@ -15,7 +15,7 @@
 
 # Line Backup To Discord
 
-📖 [繁體中文版README.md](#LINE-備份至-Discord) 📖
+📖 [繁體中文版README.md](#LINE-備份至-Discord) 📖 ｜ 📝 [What's new (Changelog)](./CHANGELOG.md)
 
 ## A bot that backs up messages from LINE to Discord in real-time
 
@@ -57,27 +57,29 @@ Find it out by the following tutorial!
 
 ### Requirements
 
-- [Python 3.13](https://www.python.org/downloads/)
-- [uv](https://docs.astral.sh/uv/getting-started/installation/) (recommended) - if uv isn't installed, the run script
-  falls back to `venv` + `pip install -r requirements.txt`
 - A public HTTPS URL that forwards to this bot, so LINE can send webhooks to it,
   see [here](#Use-Ngrok-to-create-a-static-reverse-proxy) if you don't have one
+- Only when running from source: [Python 3.13](https://www.python.org/downloads/), and
+  [uv](https://docs.astral.sh/uv/getting-started/installation/) (recommended) - if uv isn't installed, the run script
+  falls back to `venv` + `pip install -r requirements.txt`
 
 ### How to use
 
-1. Download the latest release from [here](https://github.com/HappyGroupHub/Line-Backup-To-Discord/releases), or
-   clone this repository
-2. Run `run.bat` (Windows) or `run.sh` (Linux / macOS). The first run sets up the Python environment, generates
-   `config.yml`, then exits
-3. Open up `config.yml` and fill in the required information, see [here](#About-configyml) for more details
-4. Run `run.bat` / `run.sh` again to start the bot
-5. Set up the LINE webhook to point to your server, see [here](#Setting-up-LINE-webhook)
-6. Invite the Discord bot to your Discord server, and add the LINE bot to your LINE group
-7. In the LINE group, tag the bot (`@<your LINE bot name>`), then tap `邀請好了` (invited) in the reply. The bot will
+1. Get the bot, either way works:
+    - **Windows (easiest):** Download `LineBackupToDiscord-<version>.zip` from the
+      [latest release](https://github.com/HappyGroupHub/Line-Backup-To-Discord/releases/latest) and unzip it. No need
+      to install Python
+    - **From source (Windows / Linux / macOS):** Clone this repository, then run `run.bat` (Windows) or `run.sh`
+      (Linux / macOS) once. It sets up the Python environment, generates `config.yml`, then exits
+2. Open up `config.yml` and fill in the required information, see [here](#About-configyml) for more details
+3. Start the bot with `LineBackupToDiscord.exe`, or `run.bat` / `run.sh` if you're running from source
+4. Set up the LINE webhook to point to your server, see [here](#Setting-up-LINE-webhook)
+5. Invite the Discord bot to your Discord server, and add the LINE bot to your LINE group
+6. In the LINE group, tag the bot (`@<your LINE bot name>`), then tap `邀請好了` (invited) in the reply. The bot will
    send you a 6-digit binding code, with the command in its own message so it's easy to copy. The code can only be
    used once and expires in 5 minutes. Asking again before it expires gives you the same code
-8. Send `/link <binding_code>` in the Discord channel you want to back up to
-9. Done! Every new message in the LINE group will now be backed up to that Discord channel!
+7. Send `/link <binding_code>` in the Discord channel you want to back up to
+8. Done! Every new message in the LINE group will now be backed up to that Discord channel!
 
 ### Commands
 
@@ -95,7 +97,7 @@ Find it out by the following tutorial!
 ```yaml
 # ++--------------------------------++
 # | LineBackupToDiscord (MIT LICENSE)|
-# | Made by LD               v0.1.0  |
+# | Made by LD               v0.1.1  |
 # ++--------------------------------++
 
 
@@ -219,7 +221,8 @@ Dependencies are managed with uv (`pyproject.toml` / `uv.lock`), and kept up to 
 `requirements.txt` is generated from `uv.lock` by `uv export --no-hashes --frozen > requirements.txt`, so please don't
 edit it by hand.
 
-Want to build a standalone executable? See [build_executable](./build_executable/README.md).
+Want to build a standalone executable? See [build_executable](./build_executable/README.md). Release zips are built
+on Windows by GitHub Actions, see [here](./build_executable/README.md#publishing-a-release).
 
 ### Libraries used
 
@@ -260,7 +263,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 # LINE 備份至 Discord
 
-📖 [English README.md](#Line-Backup-To-Discord) 📖
+📖 [English README.md](#Line-Backup-To-Discord) 📖 ｜ 📝 [更新內容 (Changelog)](./CHANGELOG.md)
 
 ## 一個將 LINE 訊息即時備份至 Discord 的聊天機器人
 
@@ -301,23 +304,26 @@ Discord webhook 等技術。每則訊息都會以發送者的 LINE 名稱及大�
 
 ### 系統需求
 
-- [Python 3.13](https://www.python.org/downloads/)
-- [uv](https://docs.astral.sh/uv/getting-started/installation/) (建議安裝) - 若未安裝 uv，執行腳本會改用
-  `venv` + `pip install -r requirements.txt` 來建立環境
 - 一個可以轉發到此機器人的 HTTPS 公開網址，讓 LINE 能夠傳送 Webhook，若你沒有的話請參考 [這裡](#使用-Ngrok-建立符合-HTTPS-協議的端點網址)
+- 僅從原始碼執行時需要：[Python 3.13](https://www.python.org/downloads/)，以及
+  [uv](https://docs.astral.sh/uv/getting-started/installation/) (建議安裝) - 若未安裝 uv，執行腳本會改用
+  `venv` + `pip install -r requirements.txt` 來建立環境
 
 ### 如何下載及運行
 
-1. 從 [這裡](https://github.com/HappyGroupHub/Line-Backup-To-Discord/releases) 下載最新的版本，或直接 clone 此專案
-2. 運行 `run.bat` (Windows) 或 `run.sh` (Linux / macOS)，第一次運行時會自動建立 Python 環境並產生 `config.yml`，接著程式會自動結束
-3. 開啟 `config.yml` 並遵照內文完成填寫，請參考 [這裡](#關於-configyml)，建議使用 [Notepad++](https://notepad-plus-plus.org/downloads/) 來編輯檔案
-4. 再次運行 `run.bat` / `run.sh` 來啟動機器人
-5. 設定 LINE Webhook 指向你的伺服器，請參考 [這裡](#設定-LINE-Webhook)
-6. 邀請 Discord 機器人至你的 Discord 伺服器，並將 LINE 機器人加入你的 LINE 群組
-7. 在 LINE 群組中 tag 機器人 (`@<你的 LINE 機器人名稱>`)，並在回覆中點選 `邀請好了`，機器人會另外傳送一則只有指令的訊息，方便你長按複製 6 位數的綁定碼，
+1. 取得機器人，以下兩種方式擇一：
+    - **Windows (最簡單)：** 從 [最新版本](https://github.com/HappyGroupHub/Line-Backup-To-Discord/releases/latest)
+      下載 `LineBackupToDiscord-<版本>.zip` 並解壓縮，不需要安裝 Python
+    - **從原始碼執行 (Windows / Linux / macOS)：** clone 此專案後，先運行一次 `run.bat` (Windows) 或 `run.sh` (Linux / macOS)，
+      它會自動建立 Python 環境並產生 `config.yml`，接著程式會自動結束
+2. 開啟 `config.yml` 並遵照內文完成填寫，請參考 [這裡](#關於-configyml)，建議使用 [Notepad++](https://notepad-plus-plus.org/downloads/) 來編輯檔案
+3. 運行 `LineBackupToDiscord.exe` 來啟動機器人，若從原始碼執行則運行 `run.bat` / `run.sh`
+4. 設定 LINE Webhook 指向你的伺服器，請參考 [這裡](#設定-LINE-Webhook)
+5. 邀請 Discord 機器人至你的 Discord 伺服器，並將 LINE 機器人加入你的 LINE 群組
+6. 在 LINE 群組中 tag 機器人 (`@<你的 LINE 機器人名稱>`)，並在回覆中點選 `邀請好了`，機器人會另外傳送一則只有指令的訊息，方便你長按複製 6 位數的綁定碼，
    此綁定碼僅能使用一次，並將於 5 分鐘後過期，過期前重複請求皆會取得同一組綁定碼
-8. 在你想要備份的 Discord 頻道中輸入 `/link <綁定碼>`
-9. 完成！之後 LINE 群組中的每則新訊息都會備份到該 Discord 頻道！
+7. 在你想要備份的 Discord 頻道中輸入 `/link <綁定碼>`
+8. 完成！之後 LINE 群組中的每則新訊息都會備份到該 Discord 頻道！
 
 ### 指令列表
 
@@ -335,7 +341,7 @@ Discord webhook 等技術。每則訊息都會以發送者的 LINE 名稱及大�
 ```yaml
 # ++--------------------------------++
 # | LineBackupToDiscord (MIT LICENSE)|
-# | Made by LD               v0.1.0  |
+# | Made by LD               v0.1.1  |
 # ++--------------------------------++
 
 
@@ -456,7 +462,8 @@ port 的反向代理。如果你不知道如何申請，可以使用 [ngrok](htt
 本專案使用 uv 管理套件 (`pyproject.toml` / `uv.lock`)，並由 Renovate 自動追蹤套件更新。
 `requirements.txt` 是透過 `uv export --no-hashes --frozen > requirements.txt` 從 `uv.lock` 產生的，請勿手動修改。
 
-想要打包成執行檔嗎？請參考 [build_executable](./build_executable/README.md)。
+想要打包成執行檔嗎？請參考 [build_executable](./build_executable/README.md)。發布版本的壓縮檔由 GitHub Actions 在 Windows 上自動打包，
+請參考 [這裡](./build_executable/README.md#publishing-a-release)。
 
 ### 使用的函式庫
 
