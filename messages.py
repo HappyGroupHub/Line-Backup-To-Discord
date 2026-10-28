@@ -4,7 +4,7 @@ Keep the wording here so it can be reviewed and edited in one place.
 """
 
 BOT_TITLE = "LINE ➵ Discord 訊息備份機器人"
-SUPPORTED_TYPES = "文字、圖片、影片、語音、檔案、貼圖和位置"
+SUPPORTED_TYPES = "文字、LINE 表情貼、圖片、影片、語音、檔案、貼圖和位置"
 
 # ---------------------------------------------------------------------------------------------
 # LINE

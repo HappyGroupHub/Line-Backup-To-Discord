@@ -5,6 +5,10 @@ import requests
 from line_sticker_downloader import convert_apng_to_gif
 
 EMOJIS_DIR = './downloads/emojis'
+# LINE doesn't document where emoji images are, this is the CDN the LINE store uses.
+# The iPhone version is tried first, and the android version if it's not there.
+EMOJI_BASE_URL = "https://stickershop.line-scdn.net/sticonshop/v1/sticon/{product_id}/{device}"
+EMOJI_DEVICES = ('iPhone', 'android')
 
 
 def get_emoji_spans(text: str, emojis: list) -> list | None:
@@ -72,31 +76,50 @@ def download(product_id: str, emoji_id: str) -> str | None:
         file_path = f"{folder_path}/{emoji_id}.{ext}"
         if os.path.exists(file_path):
             return file_path
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
+    os.makedirs(folder_path, exist_ok=True)
 
-    base_url = f"https://stickershop.line-scdn.net/sticonshop/v1/sticon/{product_id}/iPhone"
-    try:
-        # Animated emojis are APNG files, static emojis don't have the animation version
-        response = requests.get(f"{base_url}/{emoji_id}_animation.png", timeout=10)
-        if response.status_code == 200:
-            apng_path = f"{folder_path}/{emoji_id}.apng"
-            with open(apng_path, 'wb') as file:
-                file.write(response.content)
-            gif_path = convert_apng_to_gif(apng_path)
-            os.remove(apng_path)
-            if gif_path:
-                return gif_path
+    errors = []
+    for device in EMOJI_DEVICES:
+        base_url = EMOJI_BASE_URL.format(product_id=product_id, device=device)
+        try:
+            file_path, status_code = download_from(base_url, folder_path, emoji_id)
+        except Exception as error:
+            errors.append(f"{device}: {error}")
+            continue
+        if file_path:
+            return file_path
+        errors.append(f"{device}: status code {status_code}")
 
-        response = requests.get(f"{base_url}/{emoji_id}.png", timeout=10)
-        if response.status_code != 200:
-            print(f"Error while downloading emoji({product_id}): {emoji_id}, "
-                  f"status code: {response.status_code}")
-            return None
-        file_path = f"{folder_path}/{emoji_id}.png"
-        with open(file_path, 'wb') as file:
+    print(f"Error while downloading emoji({product_id}): {emoji_id}, {', '.join(errors)}")
+    # Don't leave an empty folder behind for an emoji set that couldn't be downloaded
+    if not os.listdir(folder_path):
+        os.rmdir(folder_path)
+    return None
+
+
+def download_from(base_url: str, folder_path: str, emoji_id: str) -> tuple[str | None, int]:
+    """Download a LINE emoji from one CDN path, animated ones are converted to GIF.
+
+    :param str base_url: CDN URL of the emoji set, without the file name.
+    :param str folder_path: Folder to save the emoji in.
+    :param str emoji_id: ID of the emoji inside the set.
+    :return tuple[str | None, int]: Path of the emoji file (None if failed) and the status code.
+    """
+    # Animated emojis are APNG files, static emojis don't have the animation version
+    response = requests.get(f"{base_url}/{emoji_id}_animation.png", timeout=10)
+    if response.status_code == 200:
+        apng_path = f"{folder_path}/{emoji_id}.apng"
+        with open(apng_path, 'wb') as file:
             file.write(response.content)
-        return file_path
-    except Exception as error:
-        print(f"Error while downloading emoji({product_id}): {emoji_id}: {error}")
-        return None
+        gif_path = convert_apng_to_gif(apng_path)
+        os.remove(apng_path)
+        if gif_path:
+            return gif_path, response.status_code
+
+    response = requests.get(f"{base_url}/{emoji_id}.png", timeout=10)
+    if response.status_code != 200:
+        return None, response.status_code
+    file_path = f"{folder_path}/{emoji_id}.png"
+    with open(file_path, 'wb') as file:
+        file.write(response.content)
+    return file_path, response.status_code
