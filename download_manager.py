@@ -3,6 +3,9 @@ import shutil
 
 DOWNLOADS_DIR = './downloads'
 STICKERS_DIR = os.path.join(DOWNLOADS_DIR, 'stickers')
+EMOJIS_DIR = os.path.join(DOWNLOADS_DIR, 'emojis')
+# Sticker packages and LINE emoji sets are caches reused by every message, not backup content
+CACHE_DIRS = (STICKERS_DIR, EMOJIS_DIR)
 
 # Modes for the downloads folder, set by `downloads_mode` in config.yml
 MODE_UNLIMITED = 'unlimited'
@@ -32,23 +35,23 @@ def get_size(path: str) -> int:
 def list_removable_items() -> list:
     """List everything in the downloads folder that can be removed to free up space.
 
-    A sticker package folder counts as one item, so a package is never left half deleted.
-    Every other file counts as one item on its own.
+    A sticker package or LINE emoji set folder counts as one item, so a package is never left
+    half deleted. Every other file counts as one item on its own.
 
     :return list: List of (last_used_time, size, path), oldest first.
     """
     items = []
     if not os.path.exists(DOWNLOADS_DIR):
         return items
-    sticker_dir = os.path.abspath(STICKERS_DIR)
+    cache_dirs = [os.path.abspath(cache_dir) for cache_dir in CACHE_DIRS]
     for root, dirs, files in os.walk(DOWNLOADS_DIR):
-        if os.path.abspath(root) == sticker_dir:
+        if os.path.abspath(root) in cache_dirs:
             for package in dirs:
                 package_path = os.path.join(root, package)
                 items.append((os.path.getmtime(package_path), get_size(package_path),
                               package_path))
             dirs.clear()  # Packages are handled as a whole, don't walk into them
-            for file_name in files:  # Loose files in the stickers folder, if any
+            for file_name in files:  # Loose files in the cache folder, if any
                 file_path = os.path.join(root, file_name)
                 items.append((os.path.getmtime(file_path), os.path.getsize(file_path),
                               file_path))
@@ -114,19 +117,31 @@ def handle_sent_file(file_path: str, config: dict):
     :param str file_path: Path of the file that has just been sent.
     :param dict config: Config read from config.yml.
     """
+    handle_sent_files([file_path], config)
+
+
+def handle_sent_files(file_paths: list, config: dict):
+    """Clean up the downloads folder after files have been sent to Discord.
+
+    :param list file_paths: Paths of the files that have just been sent.
+    :param dict config: Config read from config.yml.
+    """
     mode = config['downloads_mode']
-    # Sticker packages are a cache reused by every sticker in them, so instant_burn keeps them
-    if mode == MODE_INSTANT_BURN and not is_sticker(file_path):
-        remove(file_path)
+    if mode == MODE_INSTANT_BURN:
+        # Stickers and emojis are reused by every message, so instant_burn keeps them as a cache
+        for file_path in file_paths:
+            if not is_cache(file_path):
+                remove(file_path)
     if mode in (MODE_SIZE_LIMIT, MODE_INSTANT_BURN):
         enforce_size_limit(config['downloads_max_size_mb'])
 
 
-def is_sticker(file_path: str) -> bool:
-    """Check if a file is inside the sticker cache folder.
+def is_cache(file_path: str) -> bool:
+    """Check if a file is inside the sticker or LINE emoji cache folder.
 
     :param str file_path: Path to a file.
-    :return bool: True if the file is a sticker.
+    :return bool: True if the file is a sticker or a LINE emoji.
     """
-    sticker_dir = os.path.abspath(STICKERS_DIR)
-    return os.path.abspath(file_path).startswith(sticker_dir + os.sep)
+    file_path = os.path.abspath(file_path)
+    return any(file_path.startswith(os.path.abspath(cache_dir) + os.sep)
+               for cache_dir in CACHE_DIRS)

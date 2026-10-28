@@ -20,6 +20,7 @@ from linebot.v3.webhooks import MessageEvent, TextMessageContent, ImageMessageCo
 from pydantic import StrictStr
 
 import download_manager
+import line_emoji_downloader
 import line_sticker_downloader
 import utilities as utils
 from cache import sync_channels_cache
@@ -89,8 +90,13 @@ def handle_message(event):
             author = line_bot_api.get_group_member_profile(group_id, event.source.user_id)
             dc_channel_webhook = sync_channels_cache.get_dc_webhook_by_line_group_id(group_id)
             discord_webhook = SyncWebhook.from_url(dc_channel_webhook)
-            discord_webhook.send(message_received, username=f"{author.display_name} - (Line訊息)",
-                                 avatar_url=author.picture_url)
+            if event.message.emojis:
+                send_message_with_emojis(discord_webhook, message_received, event.message.emojis,
+                                         author)
+            else:
+                discord_webhook.send(message_received,
+                                     username=f"{author.display_name} - (Line訊息)",
+                                     avatar_url=author.picture_url)
 
         # Handle commands messages
         if message_received == "!ID":
@@ -264,6 +270,46 @@ def handle_location_message(event):
             discord_webhook = SyncWebhook.from_url(subscribed_info['discord_channel_webhook'])
             discord_webhook.send(location_message, username=f"{author.display_name} - (Line訊息)",
                                  avatar_url=author.picture_url)
+
+
+def send_message_with_emojis(discord_webhook: SyncWebhook, text: str, emojis: list, author):
+    """Send a text message with LINE emojis to Discord.
+
+    Discord can't show LINE emojis inline, so the text keeps LINE's placeholders like "(hello)"
+    and the emoji images are attached in order. A message with only emojis is sent as images
+    only, just like a sticker.
+
+    :param SyncWebhook discord_webhook: Discord webhook to send the message with.
+    :param str text: Text of the message.
+    :param list emojis: Emoji objects from the LINE webhook.
+    :param author: LINE profile of the sender.
+    """
+    emoji_files = []
+    for emoji in emojis:
+        emoji_file = line_emoji_downloader.download(emoji.product_id, emoji.emoji_id)
+        if emoji_file:
+            emoji_files.append(emoji_file)
+    for emoji_dir in {os.path.dirname(emoji_file) for emoji_file in emoji_files}:
+        # Mark the emoji set as recently used, so size_limit mode removes it later than unused ones
+        download_manager.mark_as_used(emoji_dir)
+
+    if not emoji_files:  # Failed to download every emoji, send the text only
+        discord_webhook.send(text, username=f"{author.display_name} - (Line訊息)",
+                             avatar_url=author.picture_url)
+        return
+
+    # Keep the text if some emojis failed to download, so their placeholders aren't lost
+    emoji_only = len(emoji_files) == len(emojis) and line_emoji_downloader.is_emoji_only(text,
+                                                                                         emojis)
+    content = None if emoji_only else text
+    # Discord allows at most 10 files in a message
+    for i in range(0, len(emoji_files), 10):
+        files = [File(emoji_file, filename=f"{i + j}_{os.path.basename(emoji_file)}")
+                 for j, emoji_file in enumerate(emoji_files[i:i + 10])]
+        discord_webhook.send(content if i == 0 else None, files=files,
+                             username=f"{author.display_name} - (Line訊息)",
+                             avatar_url=author.picture_url)
+    download_manager.handle_sent_files(emoji_files, config)
 
 
 def push_message(line_group_id: str, message: str):

@@ -38,12 +38,15 @@ Supported message types:
 | Files                                   |   ☑️    |
 | Stickers (animated ones become GIFs)    |   ☑️    |
 | Location (with a Google Maps link)      |   ☑️    |
-| LINE emoji                              |   ❌️    |
+| LINE emoji (sent as images)             |   ☑️    |
 | Any other types of messages             |   ❌️    |
 
-Pictures, videos, audios, files and stickers are also saved locally in the `downloads` folder.
+Discord can't show LINE emojis inside text, so the text keeps LINE's placeholders like `(hello)` and the emoji images
+are attached to the message. A message with only LINE emojis is sent as images, just like a sticker.
+
+Pictures, videos, audios, files, stickers and LINE emojis are also saved locally in the `downloads` folder.
 To keep the folder from growing forever, you can set `downloads_mode` in `config.yml` to limit its size
-(`size_limit`) or remove files right after they are backed up and only keep a sticker cache (`instant_burn`), see [here](#Managing-the-downloads-folder).
+(`size_limit`) or remove files right after they are backed up and only keep a sticker and emoji cache (`instant_burn`), see [here](#Managing-the-downloads-folder).
 
 You can definitely host this service yourself! and it's free!
 Find it out by the following tutorial!
@@ -110,12 +113,13 @@ discord_bot_token: ''
 webhook_port: 5000
 
 # Downloads folder settings.
-# Pictures, videos, audios, files and stickers are saved in the downloads folder, pick how to manage it:
+# Pictures, videos, audios, files, stickers and emojis are saved in the downloads folder,
+# pick how to manage it:
 #   'unlimited'    - Keep every file forever (default)
 #   'size_limit'   - Keep the folder under downloads_max_size_mb, the least recently used files
 #                    are removed automatically when it gets bigger than that
 #   'instant_burn' - Remove pictures, videos, audios and files right after they are sent to Discord.
-#                    Stickers are kept as a cache, limited by downloads_max_size_mb
+#                    Stickers and emojis are kept as a cache, limited by downloads_max_size_mb
 downloads_mode: 'unlimited'
 # Max size of the downloads folder in MB, used when downloads_mode is 'size_limit' or 'instant_burn'
 downloads_max_size_mb: 1024
@@ -139,7 +143,7 @@ Pictures, videos, audios, files and stickers can take up a lot of disk space ove
 |:------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `unlimited` (default)   | Keep every file forever                                                                                                                                                                                                            |
 | `size_limit`            | Keep the folder under `downloads_max_size_mb` MB. When it gets bigger, the least recently used files are removed first. A sticker package is removed as a whole. The limit is also checked when the bot starts                     |
-| `instant_burn`          | Remove pictures, videos, audios and files right after they're sent to Discord. Sticker packages are reused every time a sticker is sent, so they're kept as a cache and limited by `downloads_max_size_mb` the same way as `size_limit` |
+| `instant_burn`          | Remove pictures, videos, audios and files right after they're sent to Discord. Sticker packages and LINE emojis are reused every time they're sent, so they're kept as a cache and limited by `downloads_max_size_mb` the same way as `size_limit` |
 
 ### How to get LINE channel access token and secret
 
@@ -278,12 +282,15 @@ Discord webhook 等技術。每則訊息都會以發送者的 LINE 名稱及大�
 | 檔案                         | ☑️ |
 | 貼圖 (動態貼圖會轉為 GIF)          | ☑️ |
 | 位置訊息 (附 Google 地圖連結)       | ☑️ |
-| LINE 表情貼                   | ❌️ |
+| LINE 表情貼 (以圖片傳送)           | ☑️ |
 | 任何其他種類的訊息                  | ❌️ |
 
-圖片、影片、音檔、檔案及貼圖也會另外儲存一份在本機的 `downloads` 資料夾中。
+由於 Discord 無法在文字中顯示 LINE 表情貼，文字會保留 LINE 的替代文字 (例如 `(hello)`)，並將表情貼圖片附加在訊息中。
+只有 LINE 表情貼的訊息則會像貼圖一樣，直接以圖片傳送。
+
+圖片、影片、音檔、檔案、貼圖及 LINE 表情貼也會另外儲存一份在本機的 `downloads` 資料夾中。
 為了避免資料夾無限制地變大，你可以在 `config.yml` 中設定 `downloads_mode` 來限制資料夾大小 (`size_limit`)，
-或是在備份完成後立即刪除檔案、只保留貼圖快取 (`instant_burn`)，請參考 [這裡](#管理-downloads-資料夾)。
+或是在備份完成後立即刪除檔案、只保留貼圖及表情貼快取 (`instant_burn`)，請參考 [這裡](#管理-downloads-資料夾)。
 
 想要自己架設這個訊息備份機器人嗎?
 快點看看下面的使用教學吧!
@@ -346,12 +353,13 @@ discord_bot_token: ''
 webhook_port: 5000
 
 # Downloads folder settings.
-# Pictures, videos, audios, files and stickers are saved in the downloads folder, pick how to manage it:
+# Pictures, videos, audios, files, stickers and emojis are saved in the downloads folder,
+# pick how to manage it:
 #   'unlimited'    - Keep every file forever (default)
 #   'size_limit'   - Keep the folder under downloads_max_size_mb, the least recently used files
 #                    are removed automatically when it gets bigger than that
 #   'instant_burn' - Remove pictures, videos, audios and files right after they are sent to Discord.
-#                    Stickers are kept as a cache, limited by downloads_max_size_mb
+#                    Stickers and emojis are kept as a cache, limited by downloads_max_size_mb
 downloads_mode: 'unlimited'
 # Max size of the downloads folder in MB, used when downloads_mode is 'size_limit' or 'instant_burn'
 downloads_max_size_mb: 1024
@@ -375,7 +383,7 @@ discord_bot_invite_link: ''
 |:------------------------|:------------------------------------------------------------------------------------------------------------------|
 | `unlimited` (預設)       | 永久保留所有檔案                                                                                                     |
 | `size_limit`            | 將資料夾維持在 `downloads_max_size_mb` MB 以下，超過時會優先刪除最久沒被使用的檔案，貼圖包會整包一起刪除。機器人啟動時也會檢查一次 |
-| `instant_burn`          | 圖片、影片、音檔及檔案傳送至 Discord 後立即刪除。貼圖包每次傳送貼圖時都會重複使用，因此會保留作為快取，並和 `size_limit` 一樣受 `downloads_max_size_mb` 限制 |
+| `instant_burn`          | 圖片、影片、音檔及檔案傳送至 Discord 後立即刪除。貼圖包及 LINE 表情貼每次傳送時都會重複使用，因此會保留作為快取，並和 `size_limit` 一樣受 `downloads_max_size_mb` 限制 |
 
 ### 獲取 LINE channel access token 及 secret
 

@@ -42,12 +42,13 @@ discord_bot_token: ''
 webhook_port: 5000
 
 # Downloads folder settings.
-# Pictures, videos, audios, files and stickers are saved in the downloads folder, pick how to manage it:
+# Pictures, videos, audios, files, stickers and emojis are saved in the downloads folder,
+# pick how to manage it:
 #   'unlimited'    - Keep every file forever (default)
 #   'size_limit'   - Keep the folder under downloads_max_size_mb, the least recently used files
 #                    are removed automatically when it gets bigger than that
 #   'instant_burn' - Remove pictures, videos, audios and files right after they are sent to Discord.
-#                    Stickers are kept as a cache, limited by downloads_max_size_mb
+#                    Stickers and emojis are kept as a cache, limited by downloads_max_size_mb
 downloads_mode: 'unlimited'
 # Max size of the downloads folder in MB, used when downloads_mode is 'size_limit' or 'instant_burn'
 downloads_max_size_mb: 1024
