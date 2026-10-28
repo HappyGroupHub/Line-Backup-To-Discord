@@ -2,6 +2,7 @@ import asyncio
 
 import uvicorn
 
+import download_manager
 import utilities as utils
 from cache import sync_channels_cache
 from discord_bot import client, on_ready, about, help, link, unlink
@@ -32,6 +33,11 @@ async def run_discord_bot():
 async def main():
     # Initialize the cache
     sync_channels_cache.load_all_sync_channels()
+
+    # Trim the downloads folder in case it grew over the limit while the bot was offline
+    if config['downloads_mode'] in (download_manager.MODE_SIZE_LIMIT,
+                                    download_manager.MODE_INSTANT_BURN):
+        download_manager.enforce_size_limit(config['downloads_max_size_mb'])
 
     await asyncio.gather(
         run_linebot(),

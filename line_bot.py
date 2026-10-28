@@ -17,6 +17,7 @@ from linebot.v3.webhooks import MessageEvent, TextMessageContent, ImageMessageCo
     LocationMessageContent
 from pydantic import StrictStr
 
+import download_manager
 import line_sticker_downloader
 import utilities as utils
 from cache import sync_channels_cache
@@ -148,6 +149,7 @@ def handle_sticker_message(event):
             discord_webhook.send(file=File(sticker_file),
                                  username=f"{author.display_name} - (Line訊息)",
                                  avatar_url=author.picture_url)
+            download_manager.handle_sent_file(sticker_file, config)
 
 
 @handler.add(MessageEvent, message=ImageMessageContent)
@@ -166,6 +168,7 @@ def handle_image_message(event):
             discord_webhook.send(file=File(file_path),
                                  username=f"{author.display_name} - (Line訊息)",
                                  avatar_url=author.picture_url)
+            download_manager.handle_sent_file(file_path, config)
 
 
 @handler.add(MessageEvent, message=VideoMessageContent)
@@ -184,6 +187,7 @@ def handle_video_message(event):
             discord_webhook.send(file=File(file_path),
                                  username=f"{author.display_name} - (Line訊息)",
                                  avatar_url=author.picture_url)
+            download_manager.handle_sent_file(file_path, config)
 
 
 @handler.add(MessageEvent, message=AudioMessageContent)
@@ -202,6 +206,7 @@ def handle_video_message(event):
             discord_webhook.send(file=File(file_path),
                                  username=f"{author.display_name} - (Line訊息)",
                                  avatar_url=author.picture_url)
+            download_manager.handle_sent_file(file_path, config)
 
 
 @handler.add(MessageEvent, message=FileMessageContent)
@@ -220,6 +225,7 @@ def handle_file_message(event):
             discord_webhook.send(file=File(file_path),
                                  username=f"{author.display_name} - (Line訊息)",
                                  avatar_url=author.picture_url)
+            download_manager.handle_sent_file(file_path, config)
 
 
 @handler.add(MessageEvent, message=LocationMessageContent)
@@ -323,6 +329,8 @@ def get_sticker_file(sticker_package_id: int, single_sticker_id: int,
             break
     if not package_exists:
         sticker_package_dir = line_sticker_downloader.download(sticker_package_id)
+    # Mark the package as recently used, so size_limit mode removes it later than unused ones
+    download_manager.mark_as_used(sticker_package_dir)
 
     for file_name in os.listdir(sticker_package_dir):
         if is_animation:
