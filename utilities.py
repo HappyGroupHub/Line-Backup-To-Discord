@@ -174,23 +174,37 @@ def remove_sync_channel(line_group_id: str = None, discord_channel_id: int = Non
     sync_channels_cache.remove_sync_channel(line_group_id, discord_channel_id)
 
 
-def generate_binding_code(line_group_id: str, line_group_name: str) -> int:
-    """Generate binding code.
+def generate_binding_code(line_group_id: str, line_group_name: str) -> tuple[int, float]:
+    """Generate binding code, or reuse the one this LINE group already has.
+
+    Each LINE group has at most one active binding code, so spamming the binding request won't
+    create piles of codes. Expired codes are cleaned up at the same time.
 
     :param str line_group_id: Line group id.
     :param str line_group_name: Line group name.
-    :return int: Binding code.
+    :return tuple[int, float]: Binding code and its expiration timestamp.
     """
     if not exists('./binding_codes.json'):
         with open('binding_codes.json', 'w', encoding="utf8") as file:
             json.dump({}, file, indent=4)
             file.close()
     data = json.load(open('binding_codes.json', 'r', encoding="utf8"))
+    now = time.time()
+    # JSON object keys are always strings
+    data = {code: info for code, info in data.items() if info['expiration'] > now}
+    for code, info in data.items():
+        if info['line_group_id'] == line_group_id:
+            update_json('binding_codes.json', data)
+            return int(code), info['expiration']
+
     binding_code = random.randint(100000, 999999)
-    data[binding_code] = {'line_group_id': line_group_id, 'line_group_name': line_group_name,
-                          'expiration': time.time() + 300}
+    while str(binding_code) in data:
+        binding_code = random.randint(100000, 999999)
+    expiration = now + 300
+    data[str(binding_code)] = {'line_group_id': line_group_id, 'line_group_name': line_group_name,
+                               'expiration': expiration}
     update_json('binding_codes.json', data)
-    return binding_code
+    return binding_code, expiration
 
 
 def remove_binding_code(binding_code: int):
