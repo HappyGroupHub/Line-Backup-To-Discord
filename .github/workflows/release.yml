@@ -99,8 +99,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view "$VERSION" > /dev/null 2>&1; then
-            # Re-running for an existing release, e.g. a draft, replaces its notes and zip
-            gh release edit "$VERSION" --title "$TITLE" --notes-file release_notes.md
+            # Re-running for an existing release, e.g. a draft, replaces its notes and zip.
+            # The target only applies to drafts, a published release keeps its tag.
+            gh release edit "$VERSION" --title "$TITLE" --notes-file release_notes.md \
+              --target "$GITHUB_SHA"
             gh release upload "$VERSION" "$PACKAGE" --clobber
           else
             draft_flag=""
