@@ -34,7 +34,7 @@ deprecated==3.0.0
     # via line-bot-sdk
 discord-py==2.7.1
     # via linebackuptodiscord
-fastapi==0.162.0
+fastapi==0.162.2
     # via linebackuptodiscord
 frozenlist==1.8.0
     # via
