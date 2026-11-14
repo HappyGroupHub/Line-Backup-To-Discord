@@ -57,7 +57,7 @@ multidict==7.2.1
     # via
     #   aiohttp
     #   yarl
-opentelemetry-api==1.45.1
+opentelemetry-api==1.45.2
     # via fastapi
 packaging==26.3
     # via
